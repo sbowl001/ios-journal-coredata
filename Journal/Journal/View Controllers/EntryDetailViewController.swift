@@ -15,17 +15,36 @@ class EntryDetailViewController: UIViewController {
     
     @IBOutlet weak var entryView: UITextView!
     
-    var entry: Entry?
+    var entry: Entry? {
+        didSet {
+            self.updateViews()
+        }
+    }
     var entryController: EntryController?
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        updateViews()
 
         // Do any additional setup after loading the view.
     }
     
-
+    func updateViews() {
+        guard isViewLoaded else {return}
+        self.title = self.entry?.title ?? "Create Entry"
+        self.titleField.text  = entry?.title
+        self.entryView.text = entry?.bodyText
+    }
     @IBAction func saveJournal(_ sender: Any) {
+        guard let entryTitle = self.titleField.text, !entryTitle.isEmpty,
+        let body = entryView.text, !body.isEmpty else {return}
+        
+        if let entry = entry {
+            entryController?.update(entry: entry, title: entryTitle, bodyText: body)
+        } else {
+            entryController?.create(with: entryTitle, bodyText: body   )
+        }
+        self.navigationController?.popViewController(animated: true)
     }
     /*
     // MARK: - Navigation
