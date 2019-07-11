@@ -15,6 +15,9 @@
 		A3EFDE0B22D6CD91008B3AED /* EntryTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3EFDE0A22D6CD91008B3AED /* EntryTableViewCell.swift */; };
 		A3EFDE0D22D6CDB7008B3AED /* EntryDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3EFDE0C22D6CDB7008B3AED /* EntryDetailViewController.swift */; };
 		A3EFDE0F22D6D11D008B3AED /* CoreDataStack.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3EFDE0E22D6D11D008B3AED /* CoreDataStack.swift */; };
+		A3EFDE1522D6D1CF008B3AED /* Entry.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = A3EFDE1322D6D1CF008B3AED /* Entry.xcdatamodeld */; };
+		A3EFDE1722D6D2B2008B3AED /* Entry+Convenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3EFDE1622D6D2B2008B3AED /* Entry+Convenience.swift */; };
+		A3EFDE1922D6D584008B3AED /* EntryController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3EFDE1822D6D584008B3AED /* EntryController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -28,6 +31,9 @@
 		A3EFDE0A22D6CD91008B3AED /* EntryTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntryTableViewCell.swift; sourceTree = "<group>"; };
 		A3EFDE0C22D6CDB7008B3AED /* EntryDetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntryDetailViewController.swift; sourceTree = "<group>"; };
 		A3EFDE0E22D6D11D008B3AED /* CoreDataStack.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataStack.swift; sourceTree = "<group>"; };
+		A3EFDE1422D6D1CF008B3AED /* Entry.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Entry.xcdatamodel; sourceTree = "<group>"; };
+		A3EFDE1622D6D2B2008B3AED /* Entry+Convenience.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Entry+Convenience.swift"; sourceTree = "<group>"; };
+		A3EFDE1822D6D584008B3AED /* EntryController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntryController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -71,6 +77,9 @@
 			isa = PBXGroup;
 			children = (
 				A3EFDE0E22D6D11D008B3AED /* CoreDataStack.swift */,
+				A3EFDE1322D6D1CF008B3AED /* Entry.xcdatamodeld */,
+				A3EFDE1622D6D2B2008B3AED /* Entry+Convenience.swift */,
+				A3EFDE1822D6D584008B3AED /* EntryController.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -168,11 +177,14 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A3EFDE1522D6D1CF008B3AED /* Entry.xcdatamodeld in Sources */,
 				A3EFDE0B22D6CD91008B3AED /* EntryTableViewCell.swift in Sources */,
 				A3EFDE0922D6CD67008B3AED /* EntriesTableViewController.swift in Sources */,
 				A3EFDE0F22D6D11D008B3AED /* CoreDataStack.swift in Sources */,
 				A3EFDE0D22D6CDB7008B3AED /* EntryDetailViewController.swift in Sources */,
 				A3EFDDF722D6CC2A008B3AED /* AppDelegate.swift in Sources */,
+				A3EFDE1922D6D584008B3AED /* EntryController.swift in Sources */,
+				A3EFDE1722D6D2B2008B3AED /* Entry+Convenience.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -370,6 +382,19 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCVersionGroup section */
+		A3EFDE1322D6D1CF008B3AED /* Entry.xcdatamodeld */ = {
+			isa = XCVersionGroup;
+			children = (
+				A3EFDE1422D6D1CF008B3AED /* Entry.xcdatamodel */,
+			);
+			currentVersion = A3EFDE1422D6D1CF008B3AED /* Entry.xcdatamodel */;
+			path = Entry.xcdatamodeld;
+			sourceTree = "<group>";
+			versionGroupType = wrapper.xcdatamodel;
+		};
+/* End XCVersionGroup section */
 	};
 	rootObject = A3EFDDEB22D6CC2A008B3AED /* Project object */;
 }
