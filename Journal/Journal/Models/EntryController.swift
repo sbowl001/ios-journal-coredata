@@ -46,29 +46,19 @@ class EntryController {
 //    Create a "Create" CRUD method that will:
     
     func create(with title: String, bodyText: String) {
-        guard let taskName = self.nameTextField.text,
-            !taskName.isEmpty else {return}
-        let notes = self.notesTextView.text
-        
-        if let task = self.task {
-            //edit existing task
-            task.name = taskName
-            task.notes = notes
-            
-        } else {
-            let _ = Task(name: taskName, notes: notes)
-            
-        }
-        do {
-            let moc = CoreDataStack.shared.mainContext
-            try moc.save()
-        } catch {
-            NSLog("Error saving managed object context: \(error)")
-        }
+        let _ = Entry(title: title, bodyText: bodyText)
+        saveToPersistentStore()
     }
 //    Initialize an Entry object
 //    Save it to the persistent store.
 //    NOTE: if Xcode is giving you a warning that the Entry object isn't being used, you can make the constant's name _, or add the @discardableResult attribute to the Entry's convenience intializer in the extension you created.
+    
+    func update(entry: Entry, title: String, bodyText: String, timestamp: Date = Date()) {
+        entry.title =  title
+        entry.bodyText = bodyText
+        entry.timestamp = timestamp
+        saveToPersistentStore()
+    }
 //    Create an "Update" CRUD method. The method should:
 //    Have title and bodyText parameters as well as the Entry you want to update.
 //    Change the title and bodyText of the Entry to the new values passed in as parameters to the function.

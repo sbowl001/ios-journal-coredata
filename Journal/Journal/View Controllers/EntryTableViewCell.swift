@@ -34,8 +34,12 @@ class EntryTableViewCell: UITableViewCell {
         // Configure the view for the selected state
     }
     func updateViews() {
-        self.titleLabel.text = entry?.title
-        self.bodyLabel.text = entry?.bodyText
+        guard let entry = entry else {return}
+        titleLabel.text = entry.title
+        bodyLabel.text = entry.bodyText
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "MM-dd-yyy, HH:mm"
+        dateStampLabel.text = dateFormatter.string(from: entry.timestamp!)
 //        self.dateStampLabel = entry?.timestamp
         
     }
