@@ -20,30 +20,25 @@ class EntryController {
             NSLog("Error saving managed object context: \(error)")
         }
     }
-//    Create a function called loadFromPersistentStore() -> [Entry]. This method should:
+
     
-    func loadFromPersistentStore() -> [Entry] {
-        let fetchRequest : NSFetchRequest <Entry> = Entry.fetchRequest()
-        let moc = CoreDataStack.shared.mainContext
-        
-        do {
-            return try moc.fetch(fetchRequest)
-        } catch {
-            NSLog("Error fetching tasks: \(error)")
-            return []
-        }
-    }
-//    Create an NSFetchRequest for Entry objects
-//    Perform that fetch request on the core data stack's mainContext using a do-try-catch block.
-//    Return the results of the fetch request.
-//    In the catch statement, handle any errors and return an empty array.
-//    Create an entries: [Entry] computed property. Inside of the computed property, call loadFromPersistentStore(). This will allow any changes to the persistent store become immediately visible to the user when accessing this array (i.e. in the table view showing a list of entries).
-    var entries: [Entry] {
-        return loadFromPersistentStore()
-        
-    }
+//    func loadFromPersistentStore() -> [Entry] {
+//        let fetchRequest : NSFetchRequest <Entry> = Entry.fetchRequest()
+//        let moc = CoreDataStack.shared.mainContext
+//        
+//        do {
+//            return try moc.fetch(fetchRequest)
+//        } catch {
+//            NSLog("Error fetching tasks: \(error)")
+//            return []
+//        }
+//    }
+//
+//    var entries: [Entry] {
+//        return loadFromPersistentStore()
+//        
+//    }
     
-//    Create a "Create" CRUD method that will:
     
     func create(with title: String, bodyText: String, mood: Mood) {
         let _ = Entry(title: title, bodyText: bodyText, mood: mood)
