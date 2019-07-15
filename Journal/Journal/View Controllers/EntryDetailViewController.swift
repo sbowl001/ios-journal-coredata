@@ -15,6 +15,7 @@ class EntryDetailViewController: UIViewController {
     
     @IBOutlet weak var entryView: UITextView!
     
+    @IBOutlet weak var segmentedControl: UISegmentedControl!
     var entry: Entry? {
         didSet {
             self.updateViews()
