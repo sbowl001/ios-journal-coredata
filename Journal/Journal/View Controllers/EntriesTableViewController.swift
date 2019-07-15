@@ -70,7 +70,7 @@ class EntriesTableViewController: UITableViewController, NSFetchedResultsControl
         case .delete:
             guard let indexPath = indexPath else {return}
             tableView.deleteRows(at: [indexPath], with: .automatic)
-        @unknown default:
+        default:
             return
         }
     }
@@ -108,11 +108,11 @@ class EntriesTableViewController: UITableViewController, NSFetchedResultsControl
         }
     }
  
-//    override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
-//        guard let sectionInfo = fetchedResultsController.sections?[section] else {return nil}
-//        return sectionInfo.name
-//    }
-//    
+    override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+        guard let sectionInfo = fetchedResultsController.sections?[section] else {return nil}
+        return sectionInfo.name
+    }
+    
     // MARK: - Navigation
 
     // In a storyboard-based application, you will often want to do a little preparation before navigation
