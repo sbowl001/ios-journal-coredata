@@ -44,3 +44,22 @@ class EntryTableViewCell: UITableViewCell {
         
     }
 }
+
+
+
+//import Foundation
+//
+//class TimestampFormatter {
+//
+//    static func formatTimestamp(for entry: Entry) -> String {
+//        return dateFormatter.string(from: entry.timestamp!)
+//    }
+//
+//    static let dateFormatter: DateFormatter = {
+//        let formatter = DateFormatter()
+//        formatter.timeStyle = .short
+//        formatter.dateStyle = .short
+//        return formatter
+//    }()
+//}
+//then for the cell  timestampLabel.text = TimestampFormatter.formatTimestamp(for: entry)

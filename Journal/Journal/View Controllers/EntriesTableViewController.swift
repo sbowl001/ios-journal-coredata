@@ -73,10 +73,11 @@ class EntriesTableViewController: UITableViewController {
             guard let destinationVC = segue.destination as? EntryDetailViewController else {return}
             destinationVC.entryController = entryController 
         }
-        if segue.identifier == "ShowDetail",
-        let detailVC = segue.destination as? EntryDetailViewController,
-            let indexPath = self.tableView.indexPathForSelectedRow {
+        if segue.identifier == "ShowDetail" {
+            guard let detailVC = segue.destination as? EntryDetailViewController,
+            let indexPath = self.tableView.indexPathForSelectedRow else {return}
             detailVC.entry = self.entryController.entries[indexPath.row]
+            detailVC.entryController = entryController
         }
     }
  
