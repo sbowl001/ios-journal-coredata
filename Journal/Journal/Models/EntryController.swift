@@ -45,18 +45,19 @@ class EntryController {
     
 //    Create a "Create" CRUD method that will:
     
-    func create(with title: String, bodyText: String) {
-        let _ = Entry(title: title, bodyText: bodyText)
+    func create(with title: String, bodyText: String, mood: Mood) {
+        let _ = Entry(title: title, bodyText: bodyText, mood: mood)
         saveToPersistentStore()
     }
 //    Initialize an Entry object
 //    Save it to the persistent store.
 //    NOTE: if Xcode is giving you a warning that the Entry object isn't being used, you can make the constant's name _, or add the @discardableResult attribute to the Entry's convenience intializer in the extension you created.
     
-    func update(entry: Entry, title: String, bodyText: String) {
+    func update(entry: Entry, title: String, bodyText: String, mood: Mood) {
         entry.title =  title
         entry.bodyText = bodyText
         entry.timestamp = Date()
+        entry.mood = mood.rawValue
         saveToPersistentStore()
     }
 //    Create an "Update" CRUD method. The method should:

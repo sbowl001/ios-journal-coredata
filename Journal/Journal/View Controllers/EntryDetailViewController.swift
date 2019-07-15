@@ -35,15 +35,28 @@ class EntryDetailViewController: UIViewController {
         self.title = self.entry?.title ?? "Create Entry"
         self.titleField.text  = entry?.title
         self.entryView.text = entry?.bodyText
+
+        let mood: Mood
+        if let entryMood = entry?.mood {
+            mood = Mood(rawValue: entryMood)!
+        } else {
+            mood = .neutral
+        }
+        
+        segmentedControl.selectedSegmentIndex = Mood.allCases.firstIndex(of: mood)!
+        //Need some more explanation on this part vs the selectedSegmentIndex of saveJournal below
     }
     @IBAction func saveJournal(_ sender: Any) {
         guard let entryTitle = self.titleField.text, !entryTitle.isEmpty,
         let body = entryView.text, !body.isEmpty else {return}
         
+        let moodIndex = segmentedControl.selectedSegmentIndex
+        let mood = Mood.allCases[moodIndex]
+        
         if let entry = entry {
-            entryController?.update(entry: entry, title: entryTitle, bodyText: body)
+            entryController?.update(entry: entry, title: entryTitle, bodyText: body, mood: mood)
         } else {
-            entryController?.create(with: entryTitle, bodyText: body   )
+            entryController?.create(with: entryTitle, bodyText: body, mood: mood   )
         }
         self.navigationController?.popViewController(animated: true)
     }
