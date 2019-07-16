@@ -104,7 +104,7 @@ class EntriesTableViewController: UITableViewController, NSFetchedResultsControl
         if editingStyle == .delete {
             let entry = fetchedResultsController.object(at: indexPath)
             entryController.delete(entry: entry)
-            tableView.deleteRows(at: [indexPath], with: .fade)
+            
         }
     }
  
