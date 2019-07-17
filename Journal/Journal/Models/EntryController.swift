@@ -34,6 +34,9 @@ class EntryController {
         request.httpMethod = "PUT"
         
         do {
+            // The error is relatively clear here. It says that your
+            // entry type doesn't have an entryRepresentation property
+            // You'll need to add a computed property in entry+convenience
            let representation = entry.entryRepresentation
             
             request.httpBody  = try JSONEncoder().encode(representation)
@@ -79,6 +82,17 @@ class EntryController {
     
     func create(with title: String, bodyText: String, mood: Mood) {
         let _ = Entry(title: title, bodyText: bodyText, mood: mood)
+        // You haven't given your instance here a name
+        // in order to pass it in, you need to replace the
+        // underscore with whatever you want to call your
+        // new instance
+        
+        // before:
+        // let _ = Entry(title: title, bodyText: bodyText, mood: mood)
+        
+        // after:
+        let entry = Entry(title: title, bodyText: bodyText, mood: mood)
+
         put(entry: entry)
         saveToPersistentStore()
     }
