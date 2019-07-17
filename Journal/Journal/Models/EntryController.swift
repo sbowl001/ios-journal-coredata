@@ -81,7 +81,6 @@ class EntryController {
     
     
     func create(with title: String, bodyText: String, mood: Mood) {
-        let _ = Entry(title: title, bodyText: bodyText, mood: mood)
         // You haven't given your instance here a name
         // in order to pass it in, you need to replace the
         // underscore with whatever you want to call your
