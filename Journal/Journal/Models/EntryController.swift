@@ -9,9 +9,10 @@
 import Foundation
 import CoreData
 
+
+
+
 class EntryController {
-//    Create a function called saveToPersistentStore(). This method should save your core data stack's mainContext. Remember that this will bundle the changes in the context, pass them to the persistent store coordinator who will then put those changes in the persistent store.
-    
     func saveToPersistentStore(){
         let moc = CoreDataStack.shared.mainContext
         do {
@@ -20,39 +21,55 @@ class EntryController {
             NSLog("Error saving managed object context: \(error)")
         }
     }
-
-    
-//    func loadFromPersistentStore() -> [Entry] {
-//        let fetchRequest : NSFetchRequest <Entry> = Entry.fetchRequest()
-//        let moc = CoreDataStack.shared.mainContext
-//        
-//        do {
-//            return try moc.fetch(fetchRequest)
-//        } catch {
-//            NSLog("Error fetching tasks: \(error)")
-//            return []
-//        }
-//    }
-//
-//    var entries: [Entry] {
-//        return loadFromPersistentStore()
-//        
-//    }
+    let baseURL = URL(string: "https://journal-day3.firebaseio.com/")!
+    typealias  CompletionHandler = (Error?) -> Void
+    func put(entry: Entry, completion: @escaping CompletionHandler = { _ in}){
+        
+        let uuid = entry.identifier ?? UUID().uuidString
+        entry.identifier = uuid
+        let requestURL = baseURL.appendingPathComponent(uuid).appendingPathExtension("json")
+        var request = URLRequest(url: requestURL)
+        request.httpMethod = "PUT"
+        
+        do {
+           let representation = entry.entryRepresentation
+            
+            request.httpBody  = try JSONEncoder().encode(representation)
+            
+        } catch {
+            NSLog("error ecncoding task: \(task) \(error)")
+            completion(error)
+            return
+            
+        }
+        
+        URLSession.shared.dataTask(with: request) { (data, _, error) in
+            if let error = error {
+                NSLog("Error putting task to server: \(error)")
+                completion(error)
+                return
+            }
+            completion(nil)
+        } .resume()
+        
+        
+    }
     
     
     func create(with title: String, bodyText: String, mood: Mood) {
         let _ = Entry(title: title, bodyText: bodyText, mood: mood)
+        put(entry: entry)
         saveToPersistentStore()
     }
 //    Initialize an Entry object
-//    Save it to the persistent store.
-//    NOTE: if Xcode is giving you a warning that the Entry object isn't being used, you can make the constant's name _, or add the @discardableResult attribute to the Entry's convenience intializer in the extension you created.
+
     
     func update(entry: Entry, title: String, bodyText: String, mood: Mood) {
         entry.title =  title
         entry.bodyText = bodyText
         entry.timestamp = Date()
         entry.mood = mood.rawValue
+        put(entry: entry)
         saveToPersistentStore()
     }
 //    Create an "Update" CRUD method. The method should:

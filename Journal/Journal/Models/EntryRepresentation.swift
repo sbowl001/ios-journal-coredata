@@ -9,7 +9,7 @@
 import Foundation
 
 struct EntryRepresentation: Codable, Equatable {
-    var title: String
+    var title: String?
     var bodyText: String?
     var timestamp: Date?
     var identifier: String?
