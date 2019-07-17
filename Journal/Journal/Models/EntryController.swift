@@ -21,6 +21,8 @@ class EntryController {
             NSLog("Error saving managed object context: \(error)")
         }
     }
+    
+    // MARK: Networking
     let baseURL = URL(string: "https://journal-day3.firebaseio.com/")!
     typealias  CompletionHandler = (Error?) -> Void
     func put(entry: Entry, completion: @escaping CompletionHandler = { _ in}){
@@ -37,7 +39,7 @@ class EntryController {
             request.httpBody  = try JSONEncoder().encode(representation)
             
         } catch {
-            NSLog("error ecncoding task: \(task) \(error)")
+            NSLog("error ecncoding task: \(entry) \(error)")
             completion(error)
             return
             
@@ -55,13 +57,32 @@ class EntryController {
         
     }
     
+    func deleteEntryFromServer(_ entry: Entry, completion: @escaping CompletionHandler = {_ in}) {
+        guard let uuid = entry.identifier else {
+            completion(NSError())
+            return
+        }
+        
+        let requestURL = baseURL.appendingPathComponent(uuid).appendingPathExtension("json")
+        var request = URLRequest(url: requestURL)
+        request.httpMethod = "DELETE"
+        
+        URLSession.shared.dataTask(with: request) { (_, response, error) in
+            print(response!)
+            completion(error)
+        } .resume()
+        
+    }
+    
+    
+    
     
     func create(with title: String, bodyText: String, mood: Mood) {
         let _ = Entry(title: title, bodyText: bodyText, mood: mood)
         put(entry: entry)
         saveToPersistentStore()
     }
-//    Initialize an Entry object
+ 
 
     
     func update(entry: Entry, title: String, bodyText: String, mood: Mood) {
@@ -72,12 +93,7 @@ class EntryController {
         put(entry: entry)
         saveToPersistentStore()
     }
-//    Create an "Update" CRUD method. The method should:
-//    Have title and bodyText parameters as well as the Entry you want to update.
-//    Change the title and bodyText of the Entry to the new values passed in as parameters to the function.
-//    Update the entry's timestamp to the current time as well.
-//    Save these changes to the persistent store.
-//    Create a "Delete" CRUD method. This method should:
+ 
     
     func delete(entry: Entry) {
         
@@ -86,8 +102,5 @@ class EntryController {
         saveToPersistentStore()
         
     }
-//    Take an an Entry object to delete
-//    Delete the Entry from the core data stack's mainContext
-//    Save this deletion to the persistent store.
-
+ 
 }
