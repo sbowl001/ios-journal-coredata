@@ -13,6 +13,11 @@ import CoreData
 
 
 class EntryController {
+    
+    
+    init() {
+        fetchEntriesFromServer()
+    }
     func saveToPersistentStore(){
         let moc = CoreDataStack.shared.mainContext
         do {
@@ -25,6 +30,52 @@ class EntryController {
     // MARK: Networking
     let baseURL = URL(string: "https://journal-day3.firebaseio.com/")!
     typealias  CompletionHandler = (Error?) -> Void
+    
+    
+    func fetchSingleEntryFromPersistentStore(identifier: String) -> Entry? {
+        let fetchRequest: NSFetchRequest<Entry> = Entry.fetchRequest()
+        fetchRequest.predicate  = NSPredicate(format: "identifier == %@", identifier)
+        
+        do {
+            let moc = CoreDataStack.shared.mainContext
+            return try  moc.fetch(fetchRequest).first
+        } catch {
+            NSLog("Error fetching task with identifier \(identifier) : \(error)")
+            return nil
+        }
+    }
+ 
+    func fetchEntriesFromServer(completion: @escaping CompletionHandler = { _ in} ){
+        let requestURL = baseURL.appendingPathExtension("json")
+        
+        URLSession.shared.dataTask(with: requestURL) { (data, _, error)  in
+            if let error = error {
+                NSLog("Error fetching tasks: \(error)")
+                completion(error)
+                return
+            }
+            guard let data = data else {
+                NSLog("no data returned by data task")
+                completion(NSError())
+                return
+            }
+            
+            do {
+                let entryRepresentations = Array(try JSONDecoder().decode([String: EntryRepresentation].self, from: data).values)
+                
+                try self.updateEntry(entry: entry, with: entryRepresentations)
+                completion(nil)
+            } catch {
+                NSLog("error decoding entry representations: \(error)")
+                completion(error)
+                return
+            }
+        } .resume()
+    }
+    
+ 
+    
+    
     func put(entry: Entry, completion: @escaping CompletionHandler = { _ in}){
         
         let uuid = entry.identifier ?? UUID().uuidString
@@ -74,11 +125,16 @@ class EntryController {
         
     }
     
-    
-    
+    private func updateEntry(entry: Entry, with representation: EntryRepresentation) {
+        entry.title = representation.title
+        entry.bodyText = representation.bodyText
+        entry.mood = representation.mood
+        entry.timestamp = representation.timestamp
+    }
+    //Why do we do this? wasnt this the purpose of the "==' functions?
     
     func create(with title: String, bodyText: String, mood: Mood) {
-        let _ = Entry(title: title, bodyText: bodyText, mood: mood)
+        let entry = Entry(title: title, bodyText: bodyText, mood: mood)
         put(entry: entry)
         saveToPersistentStore()
     }
@@ -97,6 +153,7 @@ class EntryController {
     
     func delete(entry: Entry) {
         
+        deleteEntryFromServer(entry)
         CoreDataStack.shared.mainContext.delete(entry)
     
         saveToPersistentStore()
