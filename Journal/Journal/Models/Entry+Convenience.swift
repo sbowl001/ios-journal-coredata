@@ -44,7 +44,4 @@ extension Entry {
                   context: context )
     }
 }
-//Create a convenience initializer that takes in values for each of the Entry entity's attributes, and an instance of NSManagedObjectContext. Consider giving default values to the timestamp and identifier parameters in this initializer. This initializer should:
-//
-//Call the Entry class' initializer that takes in an NSManagedObjectContext
-//Set the value of attributes you defined in the data model using the parameters of the initializer.
+ 

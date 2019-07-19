@@ -32,18 +32,34 @@ class EntryController {
     typealias  CompletionHandler = (Error?) -> Void
     
     
-    func fetchSingleEntryFromPersistentStore(identifier: String) -> Entry? {
+    func fetchSingleEntryFromPersistentStore(identifier: String, context: NSManagedObjectContext) -> Entry? {
         let fetchRequest: NSFetchRequest<Entry> = Entry.fetchRequest()
         fetchRequest.predicate  = NSPredicate(format: "identifier == %@", identifier)
         
-        do {
-            let moc = CoreDataStack.shared.mainContext
-            return try  moc.fetch(fetchRequest).first
-        } catch {
-            NSLog("Error fetching task with identifier \(identifier) : \(error)")
-            return nil
+        
+        var result: Entry? = nil
+        
+        context.performAndWait {
+            do {
+                
+                result = try  context.fetch(fetchRequest).first
+            } catch {
+                NSLog("Error fetching task with identifier \(identifier) : \(error)")
+                
+            }
         }
+        return result
     }
+    //        do {
+    //            let moc = CoreDataStack.shared.mainContext
+    //            return try  moc.fetch(fetchRequest).first
+    //        } catch {
+    //            NSLog("Error fetching task with identifier \(identifier) : \(error)")
+    //            return nil
+    //        }
+    //    }
+    
+    
     
     func fetchEntriesFromServer(completion: @escaping CompletionHandler = { _ in} ){
         let requestURL = baseURL.appendingPathExtension("json")
@@ -64,31 +80,47 @@ class EntryController {
                 completion(NSError())
                 return
             }
-            DispatchQueue.main.async {
-                do {
-                    entryRepresentations = Array(try JSONDecoder().decode([String: EntryRepresentation].self, from: data).values)
-                    for entryRepresentation in entryRepresentations {
-                        let identifier = entryRepresentation.identifier
-                        if let entry = self.fetchSingleEntryFromPersistentStore(identifier:  identifier!) {
-                            
-                            self.updateEntry(entry: entry, with: entryRepresentation)
-                            
-                        } else {
-                            let _ = Entry(entryRepresentation: entryRepresentation)
-                        }
-                        
-                    }
-                    self.saveToPersistentStore()
-                    completion(nil)
-                } catch {
-                    NSLog("error decoding entry representations: \(error)")
-                    completion(error)
-                    return
-                }
+            do {
+                entryRepresentations = Array(try JSONDecoder().decode([String: EntryRepresentation].self, from: data).values)
+                let moc = CoreDataStack.shared.container.newBackgroundContext()
+                try self.updateEntries(with: entryRepresentations, context: moc)
+                
+                
+            } catch {
+                NSLog("error decoding entry representations: \(error)")
+                completion(error)
+                return
             }
+            
             } .resume()
     }
     
+    func updateEntries(with representations: [EntryRepresentation], context: NSManagedObjectContext) throws {
+        
+        var error: Error? = nil
+        
+        context.performAndWait {
+            
+            for entryRepresentation in representations {
+                let identifier = entryRepresentation.identifier
+                if let entry = self.fetchSingleEntryFromPersistentStore(identifier: identifier!, context: context) {
+                    
+                    self.updateEntry(entry: entry, with: entryRepresentation)
+                    
+                } else {
+                    let _ = Entry(entryRepresentation: entryRepresentation, context: context)
+                }
+                
+            }
+            do {
+                try context.save()
+            } catch let saveError {
+                error = saveError
+            }
+          
+        }
+        if let error = error {throw error}
+    }
     
     
     
