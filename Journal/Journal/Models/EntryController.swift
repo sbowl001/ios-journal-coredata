@@ -44,7 +44,7 @@ class EntryController {
             return nil
         }
     }
- 
+    
     func fetchEntriesFromServer(completion: @escaping CompletionHandler = { _ in} ){
         let requestURL = baseURL.appendingPathExtension("json")
         
@@ -64,32 +64,32 @@ class EntryController {
                 completion(NSError())
                 return
             }
-       DispatchQueue.main.async {
-            do {
-                entryRepresentations = Array(try JSONDecoder().decode([String: EntryRepresentation].self, from: data).values)
-                for entryRepresentation in entryRepresentations {
-                    let identifier = entryRepresentation.identifier
-                    if let entry = self.fetchSingleEntryFromPersistentStore(identifier:  identifier!) {
+            DispatchQueue.main.async {
+                do {
+                    entryRepresentations = Array(try JSONDecoder().decode([String: EntryRepresentation].self, from: data).values)
+                    for entryRepresentation in entryRepresentations {
+                        let identifier = entryRepresentation.identifier
+                        if let entry = self.fetchSingleEntryFromPersistentStore(identifier:  identifier!) {
+                            
+                            self.updateEntry(entry: entry, with: entryRepresentation)
+                            
+                        } else {
+                            let _ = Entry(entryRepresentation: entryRepresentation)
+                        }
                         
-                        self.updateEntry(entry: entry, with: entryRepresentation)
-                 
-                    } else {
-                        let _ = Entry(entryRepresentation: entryRepresentation)
                     }
-
+                    self.saveToPersistentStore()
+                    completion(nil)
+                } catch {
+                    NSLog("error decoding entry representations: \(error)")
+                    completion(error)
+                    return
                 }
-                self.saveToPersistentStore()
-                completion(nil)
-            } catch {
-                NSLog("error decoding entry representations: \(error)")
-                completion(error)
-                return
             }
-            }
-        } .resume()
+            } .resume()
     }
     
- 
+    
     
     
     func put(entry: Entry, completion: @escaping CompletionHandler = { _ in}){
@@ -101,7 +101,7 @@ class EntryController {
         request.httpMethod = "PUT"
         
         do {
-           let representation = entry.entryRepresentation
+            let representation = entry.entryRepresentation
             
             request.httpBody  = try JSONEncoder().encode(representation)
             
@@ -119,7 +119,7 @@ class EntryController {
                 return
             }
             completion(nil)
-        } .resume()
+            } .resume()
         
         
     }
@@ -137,7 +137,7 @@ class EntryController {
         URLSession.shared.dataTask(with: request) { (_, response, error) in
             print(response!)
             completion(error)
-        } .resume()
+            } .resume()
         
     }
     
@@ -154,8 +154,8 @@ class EntryController {
         put(entry: entry)
         saveToPersistentStore()
     }
- 
-
+    
+    
     
     func update(entry: Entry, title: String, bodyText: String, mood: Mood) {
         entry.title =  title
@@ -165,15 +165,15 @@ class EntryController {
         put(entry: entry)
         saveToPersistentStore()
     }
- 
+    
     
     func delete(entry: Entry) {
         
         deleteEntryFromServer(entry)
         CoreDataStack.shared.mainContext.delete(entry)
-    
+        
         saveToPersistentStore()
         
     }
- 
+    
 }
