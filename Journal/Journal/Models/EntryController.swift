@@ -48,6 +48,11 @@ class EntryController {
     func fetchEntriesFromServer(completion: @escaping CompletionHandler = { _ in} ){
         let requestURL = baseURL.appendingPathExtension("json")
         
+        var request = URLRequest(url: requestURL)
+        request.httpMethod = "GET"
+        
+        var entryRepresentations: [EntryRepresentation] = []
+        
         URLSession.shared.dataTask(with: requestURL) { (data, _, error)  in
             if let error = error {
                 NSLog("Error fetching tasks: \(error)")
@@ -61,9 +66,19 @@ class EntryController {
             }
             
             do {
-                let entryRepresentations = Array(try JSONDecoder().decode([String: EntryRepresentation].self, from: data).values)
-                
-                try self.updateEntry(entry: entry, with: entryRepresentations)
+                entryRepresentations = Array(try JSONDecoder().decode([String: EntryRepresentation].self, from: data).values)
+                for entryRepresentation in entryRepresentations {
+                    let identifier = entryRepresentation.identifier
+                    if let entry = self.fetchSingleEntryFromPersistentStore(identifier:  identifier!) {
+                        
+                        self.updateEntry(entry: entry, with: entryRepresentation)
+                 
+                    } else {
+                        let _ = Entry(entryRepresentation: entryRepresentation)
+                    }
+
+                }
+                self.saveToPersistentStore()
                 completion(nil)
             } catch {
                 NSLog("error decoding entry representations: \(error)")
