@@ -64,7 +64,7 @@ class EntryController {
                 completion(NSError())
                 return
             }
-            
+       DispatchQueue.main.async {
             do {
                 entryRepresentations = Array(try JSONDecoder().decode([String: EntryRepresentation].self, from: data).values)
                 for entryRepresentation in entryRepresentations {
@@ -84,6 +84,7 @@ class EntryController {
                 NSLog("error decoding entry representations: \(error)")
                 completion(error)
                 return
+            }
             }
         } .resume()
     }
