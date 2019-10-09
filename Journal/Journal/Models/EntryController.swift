@@ -45,51 +45,118 @@ class EntryController {
         }
     }
  
-    func fetchEntriesFromServer(completion: @escaping CompletionHandler = { _ in} ){
-        let requestURL = baseURL.appendingPathExtension("json")
-        
-        var request = URLRequest(url: requestURL)
-        request.httpMethod = "GET"
-        
-        var entryRepresentations: [EntryRepresentation] = []
-        
-        URLSession.shared.dataTask(with: requestURL) { (data, _, error)  in
-            if let error = error {
-                NSLog("Error fetching tasks: \(error)")
-                completion(error)
-                return
-            }
-            guard let data = data else {
-                NSLog("no data returned by data task")
-                completion(NSError())
-                return
-            }
-       DispatchQueue.main.async {
-            do {
-                entryRepresentations = Array(try JSONDecoder().decode([String: EntryRepresentation].self, from: data).values)
-                for entryRepresentation in entryRepresentations {
-                    let identifier = entryRepresentation.identifier
-                    if let entry = self.fetchSingleEntryFromPersistentStore(identifier:  identifier!) {
-                        
-                        self.updateEntry(entry: entry, with: entryRepresentation)
-                 
-                    } else {
-                        let _ = Entry(entryRepresentation: entryRepresentation)
-                    }
+//    func fetchEntriesFromServer(completion: @escaping CompletionHandler = { _ in} ){
+//        let requestURL = baseURL.appendingPathExtension("json")
+//
+//        var request = URLRequest(url: requestURL)
+//        request.httpMethod = "GET"
+//
+//        var entryRepresentations: [EntryRepresentation] = []
+//
+//        URLSession.shared.dataTask(with: requestURL) { (data, _, error)  in
+//            if let error = error {
+//                NSLog("Error fetching tasks: \(error)")
+//                completion(error)
+//                return
+//            }
+//            guard let data = data else {
+//                NSLog("no data returned by data task")
+//                completion(NSError())
+//                return
+//            }
+//       DispatchQueue.main.async {
+//            do {
+//                entryRepresentations = Array(try JSONDecoder().decode([String: EntryRepresentation].self, from: data).values)
+//                for entryRepresentation in entryRepresentations {
+//                    let identifier = entryRepresentation.identifier
+//                    if let entry = self.fetchSingleEntryFromPersistentStore(identifier:  identifier!) {
+//
+//                        self.updateEntries(entry: entry, with: entryRepresentation)
+//
+//                    } else {
+//                        let _ = Entry(entryRepresentation: entryRepresentation)
+//                    }
+//
+//                }
+//                self.saveToPersistentStore()
+//                completion(nil)
+//            } catch {
+//                NSLog("error decoding entry representations: \(error)")
+//                completion(error)
+//                return
+//            }
+//            }
+//        } .resume()
+//    }
 
-                }
-                self.saveToPersistentStore()
-                completion(nil)
-            } catch {
-                NSLog("error decoding entry representations: \(error)")
-                completion(error)
-                return
-            }
-            }
-        } .resume()
-    }
+    
+    //From solution code:
+//
+//    func fetchEntriesFromServer(completion: @escaping ((Error?) -> Void) = { _ in }) {
+//         let requestURL = baseURL.appendingPathExtension("json")
+//         URLSession.shared.dataTask(with: requestURL) { (data, _, error) in
+//             if let error = error {
+//                 NSLog("Error fetching entries from server: \(error)")
+//                 completion(error)
+//                 return
+//             }
+//             guard let data = data else {
+//                 NSLog("No data returned from data task")
+//                 completion(NSError())
+//                 return
+//             }
+//             var entryReps: [EntryRepresentation] = []
+//             do {
+//                 entryReps = try JSONDecoder().decode([String: EntryRepresentation].self, from: data).map({$0.value})
+//                 self.updateEntries(with: entryReps)
+//             } catch {
+//                 NSLog("Error decoding JSON data: \(error)")
+//                 completion(error)
+//                 return
+//             }
+//             completion(nil)
+//         }.resume()
+//     } //end solution code
+    
+  func fetchEntriesFromServer(completion: @escaping CompletionHandler = { _ in} ){
+    let requestURL = baseURL.appendingPathExtension("json")
+    
+            var request = URLRequest(url: requestURL)
+            request.httpMethod = "GET"
     
  
+    
+            URLSession.shared.dataTask(with: requestURL) { (data, _, error)  in
+                if let error = error {
+                    NSLog("Error fetching tasks: \(error)")
+                    completion(error)
+                    return
+                }
+                guard let data = data else {
+                    NSLog("no data returned by data task")
+                    completion(NSError())
+                    return
+                }
+
+            do {
+                    let entryRepresentations = Array(try JSONDecoder().decode([String: EntryRepresentation].self, from: data).values)
+
+                        
+    
+                           try self.updateEntries(with: entryRepresentations)
+                            
+
+                        completion(nil)
+                } catch {
+    
+                    NSLog("error decoding entry representations: \(error)")
+                    completion(error)
+                    return
+//            }
+                }
+            } .resume()
+         
+    }
     
     
     func put(entry: Entry, completion: @escaping CompletionHandler = { _ in}){
@@ -101,7 +168,13 @@ class EntryController {
         request.httpMethod = "PUT"
         
         do {
-           let representation = entry.entryRepresentation
+            guard var representation = entry.entryRepresentation else {
+                completion(nil)
+                return
+            }
+            representation.identifier = uuid
+            entry.identifier = uuid
+            saveToPersistentStore()
             
             request.httpBody  = try JSONEncoder().encode(representation)
             
@@ -141,7 +214,7 @@ class EntryController {
         
     }
     
-    private func updateEntry(entry: Entry, with representation: EntryRepresentation) {
+    func update(entry: Entry, with representation: EntryRepresentation) {
         entry.title = representation.title
         entry.bodyText = representation.bodyText
         entry.mood = representation.mood
@@ -155,16 +228,48 @@ class EntryController {
         saveToPersistentStore()
     }
  
-
-    
-    func update(entry: Entry, title: String, bodyText: String, mood: Mood) {
-        entry.title =  title
-        entry.bodyText = bodyText
-        entry.timestamp = Date()
-        entry.mood = mood.rawValue
-        put(entry: entry)
-        saveToPersistentStore()
-    }
+    func updateEntries(with representations: [EntryRepresentation]) throws {
+        let entriesWithID = representations.filter({ $0.identifier != nil}) //only task objects with identifier
+              let identifiersToFetch = entriesWithID.compactMap({ UUID(uuidString: $0.identifier!)})
+              let representationsByID = Dictionary(uniqueKeysWithValues: zip(identifiersToFetch, entriesWithID))
+              
+              var entriesToCreate = representationsByID
+              
+              let fetchRequest: NSFetchRequest<Entry> = Entry.fetchRequest()
+              fetchRequest.predicate = NSPredicate(format: "identifier IN %@", identifiersToFetch)
+              
+              let context = CoreDataStack.shared.mainContext
+              
+              do {
+                  //Updating core data tasks with representations from the server
+                  let existingEntries = try context.fetch(fetchRequest)
+                  for entry in existingEntries {
+                    guard let id = UUID(uuidString: entry.identifier ?? "") ,
+                        let representation = representationsByID[id] else {continue}
+                      self.update(entry: entry, with: representation)
+                      entriesToCreate.removeValue(forKey: id)
+                  }
+                  
+                  //creating core data tasks from representations from the server
+                  for representation in entriesToCreate.values {
+                      Entry(entryRepresentation: representation, context: context)
+                  }
+              } catch {
+                  NSLog("error fetching tasks for UUIDs: \(error)")
+              }
+              
+              saveToPersistentStore() //do try catch block
+          }
+ 
+//
+//    func update(entry: Entry, title: String, bodyText: String, mood: Mood) {
+//        entry.title =  title
+//        entry.bodyText = bodyText
+//        entry.timestamp = Date()
+//        entry.mood = mood.rawValue
+//
+//
+//    }
  
     
     func delete(entry: Entry) {

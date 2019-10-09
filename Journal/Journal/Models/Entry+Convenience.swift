@@ -30,7 +30,7 @@ extension Entry {
         self.mood = mood.rawValue
     }
     
-    convenience init? (entryRepresentation: EntryRepresentation, context: NSManagedObjectContext = CoreDataStack.shared.mainContext) {
+   @discardableResult convenience init? (entryRepresentation: EntryRepresentation, context: NSManagedObjectContext = CoreDataStack.shared.mainContext) {
         guard let mood = Mood(rawValue: entryRepresentation.mood! ),
               let timestamp = entryRepresentation.timestamp,
               let title = entryRepresentation.title,

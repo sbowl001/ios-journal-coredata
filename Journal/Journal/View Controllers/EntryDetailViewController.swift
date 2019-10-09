@@ -54,9 +54,16 @@ class EntryDetailViewController: UIViewController {
         let mood = Mood.allCases[moodIndex]
         
         if let entry = entry {
-            entryController?.update(entry: entry, title: entryTitle, bodyText: body, mood: mood)
+//            entryController?.update(entry: entry, title: entryTitle, bodyText: body, mood: mood)
+            entry.title = entryTitle
+            entry.mood = mood.rawValue
+            entry.bodyText = body
+            entryController?.put(entry: entry)
+            
         } else {
-            entryController?.create(with: entryTitle, bodyText: body, mood: mood   )
+//            entryController?.create(with: entryTitle, bodyText: body, mood: mood   )
+            let entry = Entry(title: entryTitle , bodyText: body,  mood: mood)
+            entryController?.put(entry: entry)
         }
         self.navigationController?.popViewController(animated: true)
     }
