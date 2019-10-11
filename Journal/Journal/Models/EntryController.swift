@@ -18,32 +18,32 @@ class EntryController {
     init() {
         fetchEntriesFromServer()
     }
-    func saveToPersistentStore(){
-        let moc = CoreDataStack.shared.mainContext
-        do {
-            try moc.save()
-        } catch {
-            NSLog("Error saving managed object context: \(error)")
-        }
-    }
-    
+//    func saveToPersistentStore(){
+//        let moc = CoreDataStack.shared.mainContext
+//        do {
+//            try moc.save()
+//        } catch {
+//            NSLog("Error saving managed object context: \(error)")
+//        }
+//    }
+//
     // MARK: Networking
     let baseURL = URL(string: "https://journal-day3.firebaseio.com/")!
     typealias  CompletionHandler = (Error?) -> Void
     
     
-    func fetchSingleEntryFromPersistentStore(identifier: String) -> Entry? {
-        let fetchRequest: NSFetchRequest<Entry> = Entry.fetchRequest()
-        fetchRequest.predicate  = NSPredicate(format: "identifier == %@", identifier)
-        
-        do {
-            let moc = CoreDataStack.shared.mainContext
-            return try  moc.fetch(fetchRequest).first
-        } catch {
-            NSLog("Error fetching task with identifier \(identifier) : \(error)")
-            return nil
-        }
-    }
+//    func fetchSingleEntryFromPersistentStore(identifier: String) -> Entry? {
+//        let fetchRequest: NSFetchRequest<Entry> = Entry.fetchRequest()
+//        fetchRequest.predicate  = NSPredicate(format: "identifier == %@", identifier)
+//
+//        do {
+//            let moc = CoreDataStack.shared.mainContext
+//            return try  moc.fetch(fetchRequest).first
+//        } catch {
+//            NSLog("Error fetching task with identifier \(identifier) : \(error)")
+//            return nil
+//        }
+//    }
  
 //    func fetchEntriesFromServer(completion: @escaping CompletionHandler = { _ in} ){
 //        let requestURL = baseURL.appendingPathExtension("json")
@@ -174,8 +174,8 @@ class EntryController {
             }
             representation.identifier = uuid
             entry.identifier = uuid
-            saveToPersistentStore()
-            
+//            saveToPersistentStore()
+            try CoreDataStack.shared.save()
             request.httpBody  = try JSONEncoder().encode(representation)
             
         } catch {
@@ -222,11 +222,11 @@ class EntryController {
     }
     //Why do we do this? wasnt this the purpose of the "==' functions?
     
-    func create(with title: String, bodyText: String, mood: Mood) {
-        let entry = Entry(title: title, bodyText: bodyText, mood: mood)
-        put(entry: entry)
-        saveToPersistentStore()
-    }
+//    func create(with title: String, bodyText: String, mood: Mood) {
+//        let entry = Entry(title: title, bodyText: bodyText, mood: mood)
+//        put(entry: entry)
+//        saveToPersistentStore()
+//    }
  
     func updateEntries(with representations: [EntryRepresentation]) throws {
         let entriesWithID = representations.filter({ $0.identifier != nil}) //only task objects with identifier
@@ -238,27 +238,32 @@ class EntryController {
               let fetchRequest: NSFetchRequest<Entry> = Entry.fetchRequest()
               fetchRequest.predicate = NSPredicate(format: "identifier IN %@", identifiersToFetch)
               
-              let context = CoreDataStack.shared.mainContext
-              
-              do {
-                  //Updating core data tasks with representations from the server
-                  let existingEntries = try context.fetch(fetchRequest)
-                  for entry in existingEntries {
+//              let context = CoreDataStack.shared.mainContext
+             let context = CoreDataStack.shared.container.newBackgroundContext()
+             
+        context.perform {
+            
+            do {
+                //Updating core data tasks with representations from the server
+                let existingEntries = try context.fetch(fetchRequest)
+                for entry in existingEntries {
                     guard let id = UUID(uuidString: entry.identifier ?? "") ,
                         let representation = representationsByID[id] else {continue}
-                      self.update(entry: entry, with: representation)
-                      entriesToCreate.removeValue(forKey: id)
-                  }
-                  
-                  //creating core data tasks from representations from the server
-                  for representation in entriesToCreate.values {
-                      Entry(entryRepresentation: representation, context: context)
-                  }
-              } catch {
-                  NSLog("error fetching tasks for UUIDs: \(error)")
-              }
+                    self.update(entry: entry, with: representation)
+                    entriesToCreate.removeValue(forKey: id)
+                }
+                
+                //creating core data tasks from representations from the server
+                for representation in entriesToCreate.values {
+                    Entry(entryRepresentation: representation, context: context)
+                }
+            } catch {
+                NSLog("error fetching tasks for UUIDs: \(error)")
+            }
+        }
               
-              saveToPersistentStore() //do try catch block
+//              saveToPersistentStore() //do try catch block
+        try CoreDataStack.shared.save()
           }
  
 //
@@ -276,8 +281,12 @@ class EntryController {
         
         deleteEntryFromServer(entry)
         CoreDataStack.shared.mainContext.delete(entry)
-    
-        saveToPersistentStore()
+        do {
+            try CoreDataStack.shared.save()
+        } catch {
+            NSLog("error saving deletion change \(error)")
+        }
+//        saveToPersistentStore()
         
     }
  
